@@ -1,0 +1,34 @@
+# composer で関連ライブラリインストール用イメージ
+FROM php:8.1.13-fpm-alpine AS composer
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY composer.phar /app/composer.phar
+COPY composer.json /app/composer.json
+COPY composer.lock /app/composer.lock
+
+RUN php composer.phar install
+
+# アプリ用イメージ
+FROM php:8.1.13-fpm-alpine
+
+# MySQL へ DB 保存する拡張機能
+RUN docker-php-ext-install mysqli
+
+# デバッグ実行用拡張機能
+RUN apk add autoconf \
+    && apk add gcc \
+    && apk add g++ \
+    && apk add make \
+    && apk add linux-headers \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+WORKDIR /var/www/html
+
+COPY ./docker/local/php-fpm/php.ini /usr/local/etc/php/php.ini
+COPY . /var/www/html
+COPY --from=composer /app/vendor /var/www/html/vendor
+
+RUN chmod ugo+w -R logs
