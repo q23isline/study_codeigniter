@@ -64,3 +64,31 @@ docker-compose down
 sudo chmod ugo+w application/logs
 sudo chmod -R ugo+w logs
 ```
+
+## デバッグ実行
+
+### VS Codeの初期設定
+
+- [VS Code | Marketplace | PHP Debug](https://marketplace.visualstudio.com/items?itemName=felixfbecker.php-debug)をインストールする
+- VS CodeにXDebug用の構成ファイル（launch.json）を追加する
+
+```JSONC
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "hostname": "0.0.0.0",
+            "pathMappings": {
+                "/var/www/html/": "${workspaceRoot}"
+            },
+            "environment": {
+                // デバッグ時はログレベルを 7
+                "XDEBUG_CONFIG": "log_level=7"
+            }
+        }
+    ]
+}
+```
